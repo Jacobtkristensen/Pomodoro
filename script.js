@@ -1,10 +1,13 @@
 const controlBtn = document.querySelector('.control-btn');
-const workTimer = document.querySelector('#workTimer'); // without the hyphen
+const workTimer = document.querySelector('#workTimer');
 const breakTimer = document.querySelector('#breakTimer');
+const addTimeBtn = document.querySelector('#addTimeBtn');
+const removeTimeBtn = document.querySelector('#removeTimeBtn');
+const resetTimeBtn = document.querySelector('#resetTimeBtn');
 const arm = document.querySelector('.arm');
 const circle = document.querySelector('.circleTimer');
-const workSeconds = 4;
-const breakSeconds = 4;
+const workSeconds = 1500;
+const breakSeconds = 300;
 const increment = 60;
 const circumference = 2* Math.PI * 50;
 
@@ -39,6 +42,36 @@ controlBtn.addEventListener('click', () =>{
     }
 });
 
+addTimeBtn.addEventListener('click', () => {
+    if(!isPaused) return;
+    currentSeconds += increment;
+    currentTotal += increment;
+    updateTimer(currentTimer, currentSeconds);
+    setProgress((currentTotal - currentSeconds) / currentTotal);
+});
+removeTimeBtn.addEventListener('click', () => {
+    if(!isPaused) return;
+    currentSeconds -= increment;
+    currentTotal -= increment;
+    if(currentSeconds < 0) currentSeconds = 0;
+    if(currentTotal < 0) currentTotal = 0;
+    updateTimer(currentTimer, currentSeconds);
+    setProgress((currentTotal - currentSeconds) / currentTotal);
+});
+resetTimeBtn.addEventListener('click', () => {
+    if(!isPaused) return;
+    if(isWorkPhase){
+        currentSeconds = workSeconds;
+        currentTimer = workTimer;
+    } else {
+        currentSeconds = breakSeconds;
+        currentTimer = breakTimer;
+    }
+    currentTotal = currentSeconds;
+    updateTimer(currentTimer, currentSeconds);
+    setProgress((currentTotal - currentSeconds) / currentTotal);
+});
+
 function decrement(){
     if(isPaused) return;
 
@@ -50,7 +83,7 @@ function decrement(){
 
     setProgress(percentage);
 
-    if (currentTimer === 0) {
+    if (currentSeconds === 0) {
         clearInterval(timerInterval);
         if(isWorkPhase){
             isWorkPhase = false;
@@ -69,7 +102,7 @@ function decrement(){
     };
 
 function setProgress(newPercentageValue){
-    const offset = circumference - newPercentageValue * circumference;
+    const offset = circumference - (newPercentageValue * circumference);
     circle.style.strokeDashoffset = offset;
     const rotation = newPercentageValue * 360;
     arm.style.transform = `rotate(${rotation}deg)`;
